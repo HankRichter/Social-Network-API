@@ -1,10 +1,13 @@
-const {connect, connection} = require("mongoose")
+const mongoose = require("mongoose");
 
-const connectionString =
-//insert database name!!
-process.env.MONGODB_URL || "mongodb://127.0.0.1:27017/DATEBASE NAME"
+mongoose.set("strictQuery", false);
 
-connect(connectionString, {
+mongoose.connect(
+  process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/socialNetworkDB",
+  {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-})
+  }
+);
+
+module.exports = mongoose.connection;
