@@ -6,24 +6,72 @@ module.exports = {
       .then((users) => res.json(users))
       .catch((err) => res.status(500).json(err));
   },
-  getSingleUser(req, res) {
+  getUser(req, res) {
     User.findOne({ _id: req.params.userId })
+      .select("-__v")
       .populate("thoughts")
       .populate("friends")
-      .select("-__v")
-      .then((user) =>
+      .then((user) => {
         !user
-          ? res.status(404).json({ message: "No user with that ID" })
-          : res.json(user)
-      )
+          ? res.status(404).json({ message: "No user found with this ID" })
+          : res.json(user);
+      })
       .catch((err) => res.status(500).json(err));
   },
   createUser(req, res) {
     User.create(req.body)
       .then((user) => res.json(user))
       .catch((err) => {
-        console.log(err);
-        return res.status(500).json(err);
+        res.status(500).json(err);
       });
+  },
+  updateUser(req, res) {
+    User.findOneAndUpdate(
+      { _id: req.params.id },
+      { $set: req.body },
+      { runValidators: true, new: true }
+    )
+      .then((user) => {
+        !user
+          ? res.status(404).json({ message: "No user found with this ID" })
+          : res.json(user);
+      })
+      .catch((err) => res.status(400).json(err));
+  },
+  deleteUser(req, res) {
+    User.findOneAndUpdate({ _id: req.params.userId })
+      .then((user) => {
+        !user
+          ? res.status(404).json({ message: "No user found with this ID" })
+          : res.json(user);
+        return Thought.deleteMany({ _id: { $in: user.thoughts } });
+      })
+      .catch((err) => res.status(500).json(err));
+  },
+  addFriend(req, res) {
+    User.findOneAndUpdate(
+      { _id: req.params.userId },
+      { $addToSet: { friends: req.params.friendId } },
+      { runValidators: true, new: true }
+    )
+      .then((user) => {
+        !user
+          ? res.status(404).json({ message: "No user found with this ID" })
+          : res.json(user);
+      })
+      .catch((err) => res.status(500).json(err));
+  },
+  deleteFriend(req, res) {
+    User.findOneAndUpdate(
+      { _id: req.params.userId },
+      { $pull: { friends: req.params.friendId } },
+      { runValidators: true, new: true }
+    )
+      .then((user) => {
+        !user
+          ? res.status(404).json({ message: "No user found with this ID" })
+          : res.json(user);
+      })
+      .catch((err) => res.status(500).json(err));
   },
 };
