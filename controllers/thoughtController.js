@@ -46,11 +46,11 @@ module.exports = {
       .catch((err) => res.status(500).json(err));
   },
   deleteThought(req, res) {
-    Thought.findOneAndUpdate({ _id: req.params.thoughtId })
+    Thought.findOneAndDelete({ _id: req.params.thoughtId })
       .then((thought) => {
         !thought
           ? res.status(404).json({ message: "No thought found with this ID" })
-          : res.json(thought);
+          : res.json({ message: "Thought has been deleted." });
       })
       .catch((err) => res.status(500).json(err));
   },
@@ -76,7 +76,7 @@ module.exports = {
       .then((thought) => {
         !thought
           ? res.status(404).json({ message: "No thought found with this ID" })
-          : res.json(thought);
+          : res.json({ message: "Reaction has been deleted." });
       })
       .catch((err) => res.status(500).json(err));
   },
